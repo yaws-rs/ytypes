@@ -1,5 +1,7 @@
 # yuri
 
+![meme why uri when you can have yuri](https://cdn.jsdelivr.net/gh/yaws-rs/ytypes@main/yuri/assets/yuri-logo.jpg)
+
 sans-io HTTP URI Parser & Builder
 
 ## RFCs

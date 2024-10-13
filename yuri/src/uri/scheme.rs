@@ -26,7 +26,7 @@ use core::str::FromStr;
 use crate::error::SchemeError;
 
 impl<'uri> TryFrom<&'uri str> for Scheme<'uri> {
-    type Error = SchemeError;
+    type Error = SchemeError<'uri>;
     fn try_from(raw: &'uri str) -> Result<Self, Self::Error> {
         match raw {
             "http" => Ok(Self::Http(false)),

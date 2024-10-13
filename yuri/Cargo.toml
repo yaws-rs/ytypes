@@ -12,6 +12,7 @@ categories = ["science"]
 
 [features]
 default = ["std", "parser", "builder"]
+alloc = []
 parser = ["dep:logos"]
 builder = []
 std = []
@@ -24,17 +25,17 @@ insta = { version = "1.38" }
 rstest = { version = "0.19" }
 criterion = { version = "0.5" }
 
-[[bench]]
-name = "bencher"
-required-features = ["parser", "builder"]
-harness = false
+#[[bench]]
+#name = "bencher"
+#required-features = ["parser", "builder"]
+#harness = false
 
-[[example]]
-name = "yuri_builder"
-required-features = ["builder"]
-harness = false
+#[[example]]
+#name = "yuri_builder"
+#required-features = ["builder"]
+#harness = false
 
-[[example]]
-name = "yuri_parser"
-required-features = ["parser"]
-harness = false
+#[[example]]
+#name = "yuri_parser"
+#required-features = ["parser"]
+#harness = false

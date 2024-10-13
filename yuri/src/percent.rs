@@ -17,4 +17,3 @@
 //   underscore (%5F), or tilde (%7E) should not be created by URI
 //   producers and, when found in a URI, should be decoded to their
 //   corresponding unreserved characters by URI normalizers.
-

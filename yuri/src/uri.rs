@@ -1,20 +1,11 @@
 //! Jri Public types
 
-/// URI Scheme
-#[non_exhaustive]
-pub enum Scheme<'uri> {
-    Http,
-    Https,
-    Ftp,
-    Ldap,
-    Telnet,
-    Urn,
-    Unknown(&'uri str),
-}
+pub mod scheme;
+pub use scheme::*;
 
-pub enum ParseBehaviours {
-    /// (default) Strict RFC compliance
-    Strict,
+/// By default parsing is strict RFC
+/// Some behaviours can be overriden
+pub enum ParseOverrides {
     /// Handle User:Password in Userinfo
     /// RFC 3986 s. 3.2.1. deprecates user:pass
     /// Default is to Reject
@@ -24,7 +15,10 @@ pub enum ParseBehaviours {
     DeprecatedPassword(AllowOrIgnore),
 }
 
+/// Allow or ignore type for type storage
 pub enum AllowOrIgnore {
+    /// Allow to store value
     Allow,
+    /// Ignore and don't store
     Ignore,
 }

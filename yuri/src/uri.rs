@@ -2,6 +2,14 @@
 
 pub mod scheme;
 pub use scheme::*;
+pub mod authority;
+pub use authority::*;
+
+pub struct Uri<'uri> {
+    pub(crate) scheme: Scheme<'uri>,
+    pub(crate) authority: Option<Authority<'uri>>,
+    pub(crate) scheme_data: SchemeData<'uri>,
+}
 
 /// By default parsing is strict RFC
 /// Some behaviours can be overriden

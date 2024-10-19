@@ -1,5 +1,11 @@
 //! Error types
 
+#[derive(Clone, Debug, PartialEq)]
+pub enum UriError<'uri> {
+    Scheme(SchemeError<'uri>),
+    SchemeData(SchemeDataError<'uri>),
+}
+
 /// Parsing Detail relating to an Error
 #[derive(Clone, Debug, PartialEq)]
 pub struct ParsingDetail<'uri> {
@@ -22,10 +28,32 @@ pub struct ParsingDetail<'uri> {
 pub enum SchemeError<'uri> {
     /// Invalid Scheme given
     Invalid,
+    /// Unimplemented
+    Unimplemented(crate::Scheme<'uri>),
     /// Expected Scheme, got nothing
     Nothing,
     /// Expected : separator but did not find it
     RunAway,
     /// Parsing error with detail
     ParsingDetailed(ParsingDetail<'uri>),
+}
+
+/// Authority releated errors
+#[derive(Clone, Debug, PartialEq)]
+pub enum AuthorityError<'uri> {
+    /// Expected @ separator but did not find it
+    RunAway,
+    /// Nothing seen - expected host / authority
+    ParsedNothing,
+    /// Invalid Authority portition
+    InvalidAuthority,
+    /// Parsing error with detail
+    ParsingDetailed(ParsingDetail<'uri>),    
+}
+
+/// Scheme date related errors
+#[derive(Clone, Debug, PartialEq)]
+pub enum SchemeDataError<'uri> {
+    /// Parsing error with detail
+    ParsingDetailed(ParsingDetail<'uri>),    
 }

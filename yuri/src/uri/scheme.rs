@@ -18,10 +18,12 @@ pub enum Scheme<'uri> {
     Unknown(&'uri str),
 }
 
+pub struct SchemeData<'uri> {
+    raw: Option<&'uri str>,
+}
+
 /// Whether the Scheme indicates explicit TLS
 pub type SchemeTls = bool;
-
-use core::str::FromStr;
 
 use crate::error::SchemeError;
 

@@ -5,18 +5,12 @@ use logos::{Lexer, Logos};
 use crate::{Scheme, SchemeError};
 
 #[derive(Debug, Logos)]
-enum SchemeToken<'uri> {
+pub(super) enum SchemeToken<'uri> {
     #[regex(r"[a-z]+", |lex| lex.slice(), priority = 200)]
     MaybeScheme(&'uri str),
 
-    #[regex(r":\/*\/*")]
+    #[regex(r":")]
     SchemeSep,
-}
-
-#[derive(Debug, PartialEq)]
-enum ParseStage<'uri> {
-    WantScheme,
-    WantSep(Scheme<'uri>),
 }
 
 pub fn parse_scheme<'uri>(
@@ -63,14 +57,14 @@ mod test {
         let mut lexer = SchemeToken::lexer("http://foobar.test");
         let p = parse_scheme(&mut lexer);
         assert_eq!(p, Ok(Scheme::Http(false)));
-        assert_eq!(lexer.remainder(), "foobar.test");
+        assert_eq!(lexer.remainder(), "//foobar.test");
     }
     #[test]
     fn parse_https() {
         let mut lexer = SchemeToken::lexer("https://foobar.test");
         let p = parse_scheme(&mut lexer);
         assert_eq!(p, Ok(Scheme::Http(true)));
-        assert_eq!(lexer.remainder(), "foobar.test");
+        assert_eq!(lexer.remainder(), "//foobar.test");
     }
     #[test]
     fn parse_https_flexible() {

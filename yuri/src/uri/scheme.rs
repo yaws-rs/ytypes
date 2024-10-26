@@ -18,8 +18,10 @@ pub enum Scheme<'uri> {
     Unknown(&'uri str),
 }
 
+/// Scheme data
+#[derive(Clone, Debug, PartialEq)]
 pub struct SchemeData<'uri> {
-    raw: Option<&'uri str>,
+    pub(crate) raw: Option<&'uri str>,
 }
 
 /// Whether the Scheme indicates explicit TLS

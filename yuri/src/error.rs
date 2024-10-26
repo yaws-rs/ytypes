@@ -1,8 +1,13 @@
 //! Error types
 
+/// URI Errors
 #[derive(Clone, Debug, PartialEq)]
 pub enum UriError<'uri> {
+    /// Scheme Error
     Scheme(SchemeError<'uri>),
+    /// Authority Error
+    Authority(AuthorityError<'uri>),
+    /// Scheme data error
     SchemeData(SchemeDataError<'uri>),
 }
 
@@ -45,15 +50,17 @@ pub enum AuthorityError<'uri> {
     RunAway,
     /// Nothing seen - expected host / authority
     ParsedNothing,
+    /// MissingHost
+    MissingHost,
     /// Invalid Authority portition
     InvalidAuthority,
     /// Parsing error with detail
-    ParsingDetailed(ParsingDetail<'uri>),    
+    ParsingDetailed(ParsingDetail<'uri>),
 }
 
 /// Scheme date related errors
 #[derive(Clone, Debug, PartialEq)]
 pub enum SchemeDataError<'uri> {
     /// Parsing error with detail
-    ParsingDetailed(ParsingDetail<'uri>),    
+    ParsingDetailed(ParsingDetail<'uri>),
 }

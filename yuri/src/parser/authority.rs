@@ -30,6 +30,9 @@ enum Stage {
     SeenSecondBit,
     SeenColon,
     WantHost,
+    GotHost,
+    WantPort,
+    GotPort,
 }
 
 pub(super) fn parse_authority<'uri>(
@@ -49,6 +52,9 @@ pub(super) fn parse_authority<'uri>(
             Ok(AuthorityToken::Colon) if stage == Stage::SeenFirstBit => {
                 stage = Stage::WantSecondBit;
             }
+            Ok(AuthorityToken::Colon) if stage == Stage::GotHost => {
+                stage = Stage::WantPort;
+            }
             Ok(AuthorityToken::MaybePathStart(start)) => {
                 break;
             }
@@ -62,14 +68,18 @@ pub(super) fn parse_authority<'uri>(
             }
             Ok(AuthorityToken::MaybeSomethingElse(something)) if stage == Stage::WantHost => {
                 host = Some(something);
-                break;
+                stage = Stage::GotHost;
+            }
+            Ok(AuthorityToken::MaybeSomethingElse(something)) if stage == Stage::WantPort => {
+                port = Some(something.parse().map_err(|e| AuthorityError::InvalidPort)?);
+                stage = Stage::GotPort;
             }
             _ => {
                 let cut_slice = &lexer.source()[lexer.span().start..];
                 let cut_span = &lexer.source()[lexer.span().start..lexer.span().end];
 
                 let detail = crate::error::ParsingDetail {
-                    component: "scheme",
+                    component: "authority",
                     span_start: lexer.span().start,
                     span_end: lexer.span().end,
                     source: lexer.source(),
@@ -87,6 +97,13 @@ pub(super) fn parse_authority<'uri>(
 
     if host.is_none() {
         if let Some(first_bit) = first_bit {
+            if let Some(second_bit) = second_bit {
+                port = Some(
+                    second_bit
+                        .parse()
+                        .map_err(|e| AuthorityError::InvalidPort)?,
+                );
+            }
             return Ok(Authority {
                 userinfo: None,
                 raw_host: first_bit,
@@ -118,6 +135,7 @@ pub(super) fn parse_authority<'uri>(
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::error::ParsingDetail;
     use rstest::rstest;
 
     const fn userinfo(user: &'static str, auth: Option<&'static str>) -> Option<UserInfo<'static>> {
@@ -140,15 +158,52 @@ mod test {
 
     #[rstest]
     #[case(
+        "user:authorization@foo.test:8181/path/nowhere?foo=bar",
+        "path/nowhere?foo=bar",
+        Ok(auth(userinfo("user", Some("authorization")), "foo.test", Some(8181)))
+    )]
+    #[case(
         "user:authorization@foo.test:/path/nowhere?foo=bar",
+        "path/nowhere?foo=bar",
         Ok(auth(userinfo("user", Some("authorization")), "foo.test", None))
     )]
-    fn basic_full_authority(
+    #[case(
+        "user:authorization@foo.test/path/nowhere?foo=bar",
+        "path/nowhere?foo=bar",
+        Ok(auth(userinfo("user", Some("authorization")), "foo.test", None))
+    )]
+    #[case(
+        "user:@foo.test/path/nowhere?foo=bar",
+        "path/nowhere?foo=bar",
+        Ok(auth(userinfo("user", None), "foo.test", None))
+    )]
+    #[case(
+        "foo.test/path/nowhere?foo=bar",
+        "path/nowhere?foo=bar",
+        Ok(auth(None, "foo.test", None))
+    )]
+    #[case(
+        "foo.test:800/path/nowhere?foo=bar",
+        "path/nowhere?foo=bar",
+        Ok(auth(None, "foo.test", Some(800)))
+    )]
+    #[case(
+        ":800/path/nowhere?foo=bar", "800/path/nowhere?foo=bar",
+        Err(AuthorityError::ParsingDetailed(ParsingDetail { component: "authority", span_start: 0, span_end: 1, source: ":800/path/nowhere?foo=bar", clipped_span: ":", clipped_remaining: ":800/path/nowhere?foo=bar" }))
+    )]
+    #[case(
+        "/path/nowhere?foo=bar",
+        "path/nowhere?foo=bar",
+        Err(AuthorityError::ParsedNothing)
+    )]
+    fn t_authority(
         #[case] s: &'static str,
+        #[case] remaining: &'static str,
         #[case] expected: Result<Authority<'static>, AuthorityError<'static>>,
     ) {
         let mut lexer = AuthorityToken::lexer(s);
         let a = parse_authority(&mut lexer);
         assert_eq!(expected, a);
+        assert_eq!(remaining, lexer.remainder());
     }
 }

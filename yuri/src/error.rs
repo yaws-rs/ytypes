@@ -52,6 +52,8 @@ pub enum AuthorityError<'uri> {
     ParsedNothing,
     /// MissingHost
     MissingHost,
+    /// Invalid Port
+    InvalidPort,
     /// Invalid Authority portition
     InvalidAuthority,
     /// Parsing error with detail

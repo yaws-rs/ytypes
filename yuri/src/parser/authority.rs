@@ -10,6 +10,9 @@ pub(super) enum AuthorityToken<'uri> {
     #[token("@", priority = 200)]
     At,
 
+    #[regex(r"\[[a-f0-9:]+\]", |lex| lex.slice(), priority = 250)]
+    MaybeIpv6Hostname(&'uri str),
+
     #[token(":", priority = 200)]
     Colon,
 
@@ -64,12 +67,20 @@ pub(super) fn parse_authority<'uri>(
                 first_bit = Some(something);
                 stage = Stage::SeenFirstBit;
             }
+            Ok(AuthorityToken::MaybeIpv6Hostname(something)) if stage == Stage::Nowhere => {
+                first_bit = Some(something);
+                stage = Stage::SeenFirstBit;
+            }
             Ok(AuthorityToken::MaybeSomethingElse(something)) if stage == Stage::WantSecondBit => {
                 second_bit = Some(something);
                 stage = Stage::WantAt;
             }
             Ok(AuthorityToken::MaybeSomethingElse(something)) if stage == Stage::WantHost => {
                 host = Some(something);
+                stage = Stage::GotHost;
+            }
+            Ok(AuthorityToken::MaybeIpv6Hostname(maybehost)) if stage == Stage::WantHost => {
+                host = Some(maybehost);
                 stage = Stage::GotHost;
             }
             Ok(AuthorityToken::MaybeSomethingElse(something)) if stage == Stage::WantPort => {
@@ -171,6 +182,11 @@ mod test {
         Ok((auth(userinfo("user", Some("authorization")), "foo.test", Some(8181)), Some("/")))
     )]
     #[case(
+        "user:authorization@[2001:db8::7]:8181/path/nowhere?foo=bar",
+        "path/nowhere?foo=bar",
+        Ok((auth(userinfo("user", Some("authorization")), "[2001:db8::7]", Some(8181)), Some("/")))
+    )]
+    #[case(
         "user:authorization@foo.test:/path/nowhere?foo=bar",
         "path/nowhere?foo=bar",
         Ok((auth(userinfo("user", Some("authorization")), "foo.test", None), Some("/")))
@@ -199,6 +215,11 @@ mod test {
         "foo.test:800?foo=bar",
         "foo=bar",
         Ok((auth(None, "foo.test", Some(800)), Some("?")))
+    )]
+    #[case(
+        "[2001:db8::7]:800?foo=bar",
+        "foo=bar",
+        Ok((auth(None, "[2001:db8::7]", Some(800)), Some("?")))
     )]
     #[case(
         "foo.test:800#foobar",

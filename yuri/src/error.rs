@@ -7,6 +7,8 @@ pub enum UriError<'uri> {
     Scheme(SchemeError<'uri>),
     /// Authority Error
     Authority(AuthorityError<'uri>),
+    /// Invalid Path / Query / Location separation char
+    InvalidPathQueryChar(&'uri str),
     /// Scheme data error
     SchemeData(SchemeDataError<'uri>),
 }

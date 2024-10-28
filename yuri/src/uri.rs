@@ -4,6 +4,8 @@ pub mod scheme;
 pub use scheme::*;
 pub mod authority;
 pub use authority::*;
+pub mod path;
+pub use path::*;
 
 /// URI
 pub struct Uri<'uri> {

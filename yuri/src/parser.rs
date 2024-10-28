@@ -6,6 +6,9 @@ use scheme::SchemeToken;
 mod authority;
 use authority::AuthorityToken;
 
+mod path;
+use path::PathToken;
+
 use crate::{
     error::{SchemeError, UriError},
     Uri,
@@ -36,7 +39,13 @@ impl<'uri> TryFrom<&'uri str> for Uri<'uri> {
                 return Err(UriError::Scheme(SchemeError::Unimplemented(scheme)));
             }
         };
+        // There is no possibility to revd and lexer tokens are not really Peekable
+        // so we need to hack our way with next token
         let authority = Some(res.0);
+        if res.1 == Some('/') {
+            //..
+        }
+        
         let scheme_data: crate::SchemeData<'uri> = crate::SchemeData { raw: None };
 
         Ok(Uri {

@@ -37,12 +37,13 @@ enum Stage {
 
 pub(super) fn parse_authority<'uri>(
     lexer: &mut Lexer<'uri, AuthorityToken<'uri>>,
-) -> Result<Authority<'uri>, AuthorityError<'uri>> {
+) -> Result<(Authority<'uri>, Option<&'uri str>), AuthorityError<'uri>> {
     let mut stage: Stage = Stage::Nowhere;
     let mut host: Option<&'uri str> = None;
     let mut first_bit: Option<&'uri str> = None;
     let mut second_bit: Option<&'uri str> = None;
     let mut port: Option<u16> = None;
+    let mut carry: Option<&'uri str> = None;
 
     while let Some(token) = lexer.next() {
         match token {
@@ -56,6 +57,7 @@ pub(super) fn parse_authority<'uri>(
                 stage = Stage::WantPort;
             }
             Ok(AuthorityToken::MaybePathStart(start)) => {
+                carry = Some(start);
                 break;
             }
             Ok(AuthorityToken::MaybeSomethingElse(something)) if stage == Stage::Nowhere => {
@@ -104,11 +106,14 @@ pub(super) fn parse_authority<'uri>(
                         .map_err(|e| AuthorityError::InvalidPort)?,
                 );
             }
-            return Ok(Authority {
-                userinfo: None,
-                raw_host: first_bit,
-                port,
-            });
+            return Ok((
+                Authority {
+                    userinfo: None,
+                    raw_host: first_bit,
+                    port,
+                },
+                carry,
+            ));
         }
         return Err(AuthorityError::MissingHost);
     }
@@ -122,11 +127,14 @@ pub(super) fn parse_authority<'uri>(
         } else {
             None
         };
-        return Ok(Authority {
-            userinfo,
-            raw_host: host,
-            port,
-        });
+        return Ok((
+            Authority {
+                userinfo,
+                raw_host: host,
+                port,
+            },
+            carry,
+        ));
     }
 
     Err(AuthorityError::InvalidAuthority)
@@ -160,32 +168,42 @@ mod test {
     #[case(
         "user:authorization@foo.test:8181/path/nowhere?foo=bar",
         "path/nowhere?foo=bar",
-        Ok(auth(userinfo("user", Some("authorization")), "foo.test", Some(8181)))
+        Ok((auth(userinfo("user", Some("authorization")), "foo.test", Some(8181)), Some("/")))
     )]
     #[case(
         "user:authorization@foo.test:/path/nowhere?foo=bar",
         "path/nowhere?foo=bar",
-        Ok(auth(userinfo("user", Some("authorization")), "foo.test", None))
+        Ok((auth(userinfo("user", Some("authorization")), "foo.test", None), Some("/")))
     )]
     #[case(
         "user:authorization@foo.test/path/nowhere?foo=bar",
         "path/nowhere?foo=bar",
-        Ok(auth(userinfo("user", Some("authorization")), "foo.test", None))
+        Ok((auth(userinfo("user", Some("authorization")), "foo.test", None), Some("/")))
     )]
     #[case(
         "user:@foo.test/path/nowhere?foo=bar",
         "path/nowhere?foo=bar",
-        Ok(auth(userinfo("user", None), "foo.test", None))
+        Ok((auth(userinfo("user", None), "foo.test", None), Some("/")))
     )]
     #[case(
         "foo.test/path/nowhere?foo=bar",
         "path/nowhere?foo=bar",
-        Ok(auth(None, "foo.test", None))
+        Ok((auth(None, "foo.test", None), Some("/")))
     )]
     #[case(
         "foo.test:800/path/nowhere?foo=bar",
         "path/nowhere?foo=bar",
-        Ok(auth(None, "foo.test", Some(800)))
+        Ok((auth(None, "foo.test", Some(800)), Some("/")))
+    )]
+    #[case(
+        "foo.test:800?foo=bar",
+        "foo=bar",
+        Ok((auth(None, "foo.test", Some(800)), Some("?")))
+    )]
+    #[case(
+        "foo.test:800#foobar",
+        "foobar",
+        Ok((auth(None, "foo.test", Some(800)), Some("#")))
     )]
     #[case(
         ":800/path/nowhere?foo=bar", "800/path/nowhere?foo=bar",
@@ -199,7 +217,7 @@ mod test {
     fn t_authority(
         #[case] s: &'static str,
         #[case] remaining: &'static str,
-        #[case] expected: Result<Authority<'static>, AuthorityError<'static>>,
+        #[case] expected: Result<(Authority<'static>, Option<&str>), AuthorityError<'static>>,
     ) {
         let mut lexer = AuthorityToken::lexer(s);
         let a = parse_authority(&mut lexer);

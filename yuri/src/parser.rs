@@ -24,21 +24,19 @@ impl<'uri> TryFrom<&'uri str> for Uri<'uri> {
             lexer.bump(2);
         }
 
-        let authority = match scheme {
+        let res = match scheme {
             Scheme::Http(_) | Scheme::Ftp(_) | Scheme::Ldap(_) => {
                 let mut authority_lexer: Lexer<'uri, AuthorityToken<'uri>> = lexer.morph();
-                let authority = Some(
-                    authority::parse_authority(&mut authority_lexer)
-                        .map_err(|e| UriError::Authority(e))?,
-                );
+                let (l_authority, l_carry) = authority::parse_authority(&mut authority_lexer)
+                    .map_err(|e| UriError::Authority(e))?;
                 lexer = authority_lexer.morph();
-                authority
+                (l_authority, l_carry)
             }
             _ => {
                 return Err(UriError::Scheme(SchemeError::Unimplemented(scheme)));
             }
         };
-
+        let authority = Some(res.0);
         let scheme_data: crate::SchemeData<'uri> = crate::SchemeData { raw: None };
 
         Ok(Uri {

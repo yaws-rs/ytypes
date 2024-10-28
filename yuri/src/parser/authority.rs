@@ -27,11 +27,8 @@ pub(super) enum AuthorityToken<'uri> {
 enum Stage {
     Nowhere,
     WantAt,
-    SeenAt,
     SeenFirstBit,
     WantSecondBit,
-    SeenSecondBit,
-    SeenColon,
     WantHost,
     GotHost,
     WantPort,
@@ -84,7 +81,7 @@ pub(super) fn parse_authority<'uri>(
                 stage = Stage::GotHost;
             }
             Ok(AuthorityToken::MaybeSomethingElse(something)) if stage == Stage::WantPort => {
-                port = Some(something.parse().map_err(|e| AuthorityError::InvalidPort)?);
+                port = Some(something.parse().map_err(|_| AuthorityError::InvalidPort)?);
                 stage = Stage::GotPort;
             }
             _ => {
@@ -114,7 +111,7 @@ pub(super) fn parse_authority<'uri>(
                 port = Some(
                     second_bit
                         .parse()
-                        .map_err(|e| AuthorityError::InvalidPort)?,
+                        .map_err(|_| AuthorityError::InvalidPort)?,
                 );
             }
             return Ok((

@@ -6,6 +6,8 @@ pub mod authority;
 pub use authority::*;
 pub mod path;
 pub use path::*;
+pub mod query;
+pub use query::*;
 
 /// URI
 pub struct Uri<'uri> {
@@ -15,6 +17,8 @@ pub struct Uri<'uri> {
     pub authority: Option<Authority<'uri>>,
     /// Path
     pub path: Option<Path<'uri>>,
+    /// Query
+    pub query: Option<Query<'uri>>,
     /// Scheme based data
     pub scheme_data: SchemeData<'uri>,
 }

@@ -9,6 +9,9 @@ use authority::AuthorityToken;
 mod path;
 use path::PathToken;
 
+mod query;
+use query::QueryToken;
+
 use crate::{
     error::{SchemeError, UriError},
     Uri,
@@ -39,21 +42,39 @@ impl<'uri> TryFrom<&'uri str> for Uri<'uri> {
                 return Err(UriError::Scheme(SchemeError::Unimplemented(scheme)));
             }
         };
+        let authority = Some(res.0);
+
+        //*****************************************
+        // Path
+        //*****************************************
 
         // There is no possibility to revd and lexer tokens are not really Peekable
         // so we need to hack our way with next token
-        let authority = Some(res.0);
         let path_res = match res.1 {
             Some("/") => {
                 let mut path_lexer: Lexer<'uri, PathToken<'uri>> = lexer.morph();
                 let res = path::parse_path(&mut path_lexer).map_err(|e| UriError::Path(e))?;
-                //lexer = path_lexer.morph();
+                lexer = path_lexer.morph();
                 res
             }
             _ => (None, res.1),
         };
-
         let path = path_res.0;
+
+        //*****************************************
+        // Query
+        //*****************************************
+
+        let query_res = match path_res.1 {
+            Some("?") => {
+                let mut query_lexer: Lexer<'uri, QueryToken<'uri>> = lexer.morph();
+                let res = query::parse_query(&mut query_lexer).map_err(|e| UriError::Query(e))?;
+                //lexer = path_lexer.morph();
+                res
+            }
+            _ => (None, path_res.1),
+        };
+        let query = query_res.0;
 
         let scheme_data: crate::SchemeData<'uri> = crate::SchemeData { raw: None };
 
@@ -61,6 +82,7 @@ impl<'uri> TryFrom<&'uri str> for Uri<'uri> {
             scheme,
             authority,
             path,
+            query,
             scheme_data,
         })
     }

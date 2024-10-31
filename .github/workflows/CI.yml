@@ -32,7 +32,7 @@ jobs:
       - uses: taiki-e/install-action@cargo-hack
       # No default features build
       - name: no_std / parser-builder
-        run: cargo build -p ${{ matrix.crate }} --target thumbv7em-none-eabi --release --no-default-features --features parser.builder
+        run: cargo build -p ${{ matrix.crate }} --target thumbv7em-none-eabi --release --no-default-features --features parser,builder
 
   check-test-all:
     name: test, fmt, clippy

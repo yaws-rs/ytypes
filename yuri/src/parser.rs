@@ -39,18 +39,28 @@ impl<'uri> TryFrom<&'uri str> for Uri<'uri> {
                 return Err(UriError::Scheme(SchemeError::Unimplemented(scheme)));
             }
         };
+
         // There is no possibility to revd and lexer tokens are not really Peekable
         // so we need to hack our way with next token
         let authority = Some(res.0);
-        if res.1 == Some('/') {
-            //..
-        }
-        
+        let path_res = match res.1 {
+            Some("/") => {
+                let mut path_lexer: Lexer<'uri, PathToken<'uri>> = lexer.morph();
+                let res = path::parse_path(&mut path_lexer).map_err(|e| UriError::Path(e))?;
+                //lexer = path_lexer.morph();
+                res
+            }
+            _ => (None, res.1),
+        };
+
+        let path = path_res.0;
+
         let scheme_data: crate::SchemeData<'uri> = crate::SchemeData { raw: None };
 
         Ok(Uri {
             scheme,
             authority,
+            path,
             scheme_data,
         })
     }

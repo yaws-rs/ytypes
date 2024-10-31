@@ -7,6 +7,10 @@ pub enum UriError<'uri> {
     Scheme(SchemeError<'uri>),
     /// Authority Error
     Authority(AuthorityError<'uri>),
+    /// Invalid Path / Query / Location separation char
+    InvalidPathQueryChar(&'uri str),
+    /// Path Error
+    Path(PathError<'uri>),
     /// Scheme data error
     SchemeData(SchemeDataError<'uri>),
 }
@@ -56,6 +60,13 @@ pub enum AuthorityError<'uri> {
     InvalidPort,
     /// Invalid Authority portition
     InvalidAuthority,
+    /// Parsing error with detail
+    ParsingDetailed(ParsingDetail<'uri>),
+}
+
+/// Path related errors
+#[derive(Clone, Debug, PartialEq)]
+pub enum PathError<'uri> {
     /// Parsing error with detail
     ParsingDetailed(ParsingDetail<'uri>),
 }

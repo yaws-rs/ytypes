@@ -13,7 +13,9 @@ pub enum UriError<'uri> {
     Path(PathError<'uri>),
     /// Query Error
     Query(QueryError<'uri>),
-    /// Scheme data error
+    /// Fragment Error
+    Fragment(FragmentError<'uri>),
+    /// Scheme data error    
     SchemeData(SchemeDataError<'uri>),
 }
 
@@ -76,6 +78,13 @@ pub enum PathError<'uri> {
 /// Query related errors
 #[derive(Clone, Debug, PartialEq)]
 pub enum QueryError<'uri> {
+    /// Parsing error with detail
+    ParsingDetailed(ParsingDetail<'uri>),
+}
+
+/// Fragment related errors
+#[derive(Clone, Debug, PartialEq)]
+pub enum FragmentError<'uri> {
     /// Parsing error with detail
     ParsingDetailed(ParsingDetail<'uri>),
 }

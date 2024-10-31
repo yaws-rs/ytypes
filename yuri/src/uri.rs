@@ -8,6 +8,8 @@ pub mod path;
 pub use path::*;
 pub mod query;
 pub use query::*;
+pub mod fragment;
+pub use fragment::*;
 
 /// URI
 pub struct Uri<'uri> {
@@ -19,6 +21,8 @@ pub struct Uri<'uri> {
     pub path: Option<Path<'uri>>,
     /// Query
     pub query: Option<Query<'uri>>,
+    /// Fragment
+    pub fragment: Option<Fragment<'uri>>,
     /// Scheme based data
     pub scheme_data: SchemeData<'uri>,
 }

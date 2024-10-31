@@ -12,6 +12,9 @@ use path::PathToken;
 mod query;
 use query::QueryToken;
 
+mod fragment;
+use fragment::FragmentToken;
+
 use crate::{
     error::{SchemeError, UriError},
     Uri,
@@ -69,12 +72,28 @@ impl<'uri> TryFrom<&'uri str> for Uri<'uri> {
             Some("?") => {
                 let mut query_lexer: Lexer<'uri, QueryToken<'uri>> = lexer.morph();
                 let res = query::parse_query(&mut query_lexer).map_err(|e| UriError::Query(e))?;
-                //lexer = path_lexer.morph();
+                lexer = query_lexer.morph();
                 res
             }
             _ => (None, path_res.1),
         };
         let query = query_res.0;
+
+        //*****************************************
+        // Fragment
+        //*****************************************
+
+        let fragment_res = match query_res.1 {
+            Some("#") => {
+                let mut fragment_lexer: Lexer<'uri, FragmentToken<'uri>> = lexer.morph();
+                let res = fragment::parse_fragment(&mut fragment_lexer)
+                    .map_err(|e| UriError::Fragment(e))?;
+                //lexer = path_lexer.morph();
+                res
+            }
+            _ => (None, query_res.1),
+        };
+        let fragment = fragment_res.0;
 
         let scheme_data: crate::SchemeData<'uri> = crate::SchemeData { raw: None };
 
@@ -83,6 +102,7 @@ impl<'uri> TryFrom<&'uri str> for Uri<'uri> {
             authority,
             path,
             query,
+            fragment,
             scheme_data,
         })
     }

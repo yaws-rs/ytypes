@@ -9,6 +9,7 @@ license = "Apache-2.0/MIT"
 readme = "README.md"
 repository = "https://github.com/yaws-rs/ytypes"
 categories = ["science"]
+exclude = ["assets/"]
 
 [features]
 default = ["std", "parser", "builder"]

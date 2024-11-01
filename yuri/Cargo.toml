@@ -1,6 +1,6 @@
 [package]
 name = "yuri"
-version = "0.1.0-absolut1"
+version = "0.1.0-absolut2"
 edition = "2021"
 description = "Parser & Builder for HTTP URI"
 homepage = "https://github.com/yaws-rs/ytypes"
@@ -26,17 +26,16 @@ insta = { version = "1.38" }
 rstest = { version = "0.19" }
 criterion = { version = "0.5" }
 
-#[[bench]]
-#name = "bencher"
-#required-features = ["parser", "builder"]
-#harness = false
+[package.metadata.docs.rs]
+features = ["std", "parser", "builder"]
 
-#[[example]]
-#name = "yuri_builder"
-#required-features = ["builder"]
-#harness = false
+[[bench]]
+name = "bencher"
+required-features = ["parser", "builder"]
+harness = false
 
-#[[example]]
-#name = "yuri_parser"
-#required-features = ["parser"]
-#harness = false
+[[example]]
+name = "construct_uri"
+required-features = ["parser"]
+harness = false
+doc-scrape-examples = true

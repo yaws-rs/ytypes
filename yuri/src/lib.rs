@@ -20,8 +20,8 @@ extern crate alloc;
 // Error types
 //---------------------------------------------------------
 
-mod error;
-pub use error::*;
+pub mod error;
+pub(crate) use error::*;
 
 //---------------------------------------------------------
 // uri types

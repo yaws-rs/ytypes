@@ -1,17 +1,18 @@
 //! Jri Public types
 
-pub mod scheme;
+mod scheme;
 pub use scheme::*;
-pub mod authority;
+mod authority;
 pub use authority::*;
-pub mod path;
+mod path;
 pub use path::*;
-pub mod query;
+mod query;
 pub use query::*;
-pub mod fragment;
+mod fragment;
 pub use fragment::*;
 
 /// URI
+#[derive(Debug, Clone, PartialEq)]
 pub struct Uri<'uri> {
     /// Scheme
     pub scheme: Scheme<'uri>,
@@ -25,4 +26,13 @@ pub struct Uri<'uri> {
     pub fragment: Option<Fragment<'uri>>,
     /// Scheme based data
     pub scheme_data: SchemeData<'uri>,
+}
+
+use crate::error::UriError;
+
+impl<'uri> Uri<'uri> {
+    /// Construct a new URI from &str
+    pub fn new(input: &'uri str) -> Result<Self, UriError<'uri>> {
+        input.try_into()
+    }
 }

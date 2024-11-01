@@ -2,7 +2,30 @@
 
 ![meme why uri when you can have yuri](https://cdn.jsdelivr.net/gh/yaws-rs/ytypes@main/yuri/assets/yuri-logo.jpg)
 
-sans-io HTTP URI Parser & Builder
+no_std, alloc-free permissive URI Parser & Builder
+
+```rust
+let s = "https://foo:secret@foobar.test:666/?q=a&m=s#fragemnt";
+let yuri::uri = Uri::new(s).expect("Failed to parse URI");
+```
+
+## Motivation
+
+Optimise on size and being permissive and flexible minimally parsing in no_std & alloc-free environments.
+
+Various RFCs / standards & intepretations complicate the picture,
+
+e.g. punycode and this is left to the downstream consumer currently to validate.
+
+We may in the future support opt-in further validation (e.g. IDNA), which the downstream consumer must consider.
+
+## Benchmark
+
+In MacBook M1 13":
+
+| Scenario                     | Criterion                       |
+| :---                         | :---                            |
+| yuri::Uri New full HTTPs URL | [65.657 ns 65.751 ns 65.846 ns] |
 
 ## RFCs
 

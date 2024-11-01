@@ -13,7 +13,7 @@ pub(super) fn parse_fragment<'uri>(
     lexer: &mut Lexer<'uri, FragmentToken<'uri>>,
 ) -> Result<(Option<Fragment<'uri>>, Option<&'uri str>), FragmentError<'uri>> {
     let mut res: Option<Fragment<'uri>> = None;
-    let mut carry: Option<&'uri str> = None;
+    let carry: Option<&'uri str> = None;
 
     while let Some(token) = lexer.next() {
         match token {

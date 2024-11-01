@@ -6,7 +6,7 @@ no_std, alloc-free permissive URI Parser & Builder
 
 ```rust
 let s = "https://foo:secret@foobar.test:666/?q=a&m=s#fragemnt";
-let yuri::uri = Uri::new(s).expect("Failed to parse URI");
+let uri = yuri::Uri::new(s).expect("Failed to parse URI");
 ```
 
 ## Motivation

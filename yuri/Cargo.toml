@@ -1,6 +1,6 @@
 [package]
 name = "yuri"
-version = "0.1.0-absolut2"
+version = "0.1.0"
 edition = "2021"
 description = "no_std alloc-free URI Parser"
 homepage = "https://github.com/yaws-rs/ytypes"

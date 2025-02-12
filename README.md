@@ -10,3 +10,4 @@ Misc types mainly for yaws but these are portable.
 [ [capacity]  | Capacity type                   |
 
 [yuri]: ./yuri
+[capacity]: ./capacity

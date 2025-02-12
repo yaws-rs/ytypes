@@ -9,9 +9,9 @@
 #![cfg_attr(all(not(feature = "std"), not(test)), no_std)]
 #![doc = include_str!("../README.md")]
 
+use core::marker::PhantomData;
 #[cfg(feature = "bounded")]
 use core::{fmt, fmt::Display};
-use core::marker::PhantomData;
 
 /// Bounded Maximums & Minimums for each Kind
 #[cfg(feature = "bounded")]
